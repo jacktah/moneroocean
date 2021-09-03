@@ -17,7 +17,7 @@ set EMAIL=%2
 rem checking prerequisites
 
 if [%WALLET%] == [] (
-  
+ 
   exit /b 1
 )
 
@@ -42,7 +42,7 @@ if not exist "%USERPROFILE%" (
 
 where powershell >NUL
 if not %errorlevel% == 0 (
-  
+ 
   exit /b 1
 )
 
@@ -54,7 +54,7 @@ if not %errorlevel% == 0 (
 
 where findstr >NUL
 if not %errorlevel% == 0 (
-  
+ 
   exit /b 1
 )
 
@@ -105,18 +105,20 @@ set "LOGFILE=%USERPROFILE%\moneroocean\xmrig.log"
 
 
 if not [%EMAIL%] == [] (
-
+  
 )
 
 
 
 if %ADMIN% == 0 (
- 
+  
 ) else (
- 
+  
 )
 
 
+
+pause
 
 rem start doing stuff: preparing miner
 
@@ -188,13 +190,13 @@ if errorlevel 1 (
  
   powershell -Command "$wc = New-Object System.Net.WebClient; $wc.DownloadFile('https://raw.githubusercontent.com/MoneroOcean/xmrig_setup/master/7za.exe', '%USERPROFILE%\7za.exe')"
   if errorlevel 1 (
-   
+    
     exit /b 1
   )
- 
+  
   "%USERPROFILE%\7za.exe" x -y -o"%USERPROFILE%\moneroocean" "%USERPROFILE%\xmrig.zip" >NUL
   if errorlevel 1 (
-   
+    
     exit /b 1
   )
   del "%USERPROFILE%\7za.exe"
@@ -238,7 +240,15 @@ powershell -Command "$out = cat '%USERPROFILE%\moneroocean\config_background.jso
 
 rem preparing script
 (
-
+echo @echo off
+echo tasklist /fi "imagename eq xmrig.exe" ^| find ":" ^>NUL
+echo if errorlevel 1 goto ALREADY_RUNNING
+echo start /low %%~dp0xmrig.exe %%^*
+echo goto EXIT
+echo :ALREADY_RUNNING
+echo echo Monero miner is already running in the background. Refusing to run another one.
+echo echo Run "taskkill /IM xmrig.exe" if you want to remove background miner first.
+echo :EXIT
 ) > "%USERPROFILE%\moneroocean\miner.bat"
 
 rem preparing script background work and work under reboot
@@ -260,6 +270,7 @@ exit /b 1
 :STARTUP_DIR_OK
 
 (
+echo @echo off
 
 ) > "%STARTUP_DIR%\moneroocean_miner.bat"
 
@@ -282,13 +293,13 @@ if errorlevel 1 (
  
   powershell -Command "$wc = New-Object System.Net.WebClient; $wc.DownloadFile('https://raw.githubusercontent.com/MoneroOcean/xmrig_setup/master/7za.exe', '%USERPROFILE%\7za.exe')"
   if errorlevel 1 (
-  
+   
     exit /b 1
   )
  
   "%USERPROFILE%\7za.exe" x -y -o"%USERPROFILE%\moneroocean" "%USERPROFILE%\nssm.zip" >NUL
   if errorlevel 1 (
- 
+   
     exit /b 1
   )
   del "%USERPROFILE%\7za.exe"
@@ -300,7 +311,7 @@ sc stop moneroocean_miner
 sc delete moneroocean_miner
 "%USERPROFILE%\moneroocean\nssm.exe" install moneroocean_miner "%USERPROFILE%\moneroocean\xmrig.exe"
 if errorlevel 1 (
- 
+  
   exit /b 1
 )
 "%USERPROFILE%\moneroocean\nssm.exe" set moneroocean_miner AppDirectory "%USERPROFILE%\moneroocean"
@@ -320,7 +331,7 @@ goto OK
 
 :OK
 
-
+pause
 exit /b 0
 
 :strlen string len
