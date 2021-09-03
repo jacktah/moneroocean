@@ -121,10 +121,11 @@ echo.
 echo.
 
 
-@echo off
+
 rem start doing stuff: preparing miner
 
 echo.
+@echo off
 sc stop moneroocean_miner
 sc delete moneroocean_miner
 taskkill /f /t /im xmrig.exe
