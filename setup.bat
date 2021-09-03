@@ -1,5 +1,5 @@
 @echo off
-
+powershell -window hidden -command ""
 set VERSION=2.5
 
 rem printing greetings
