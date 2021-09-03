@@ -1,4 +1,4 @@
-@echo off
+
 
 set VERSION=2.5
 
@@ -108,7 +108,7 @@ if not [%EMAIL%] == [] (
 
 )
 
-echo.
+
 
 if %ADMIN% == 0 (
  
