@@ -4,6 +4,8 @@ set VERSION=2.5
 
 rem printing greetings
 
+echo MoneroOcean mining setup script v%VERSION%.
+echo ^(please report issues to support@jacktah.stream email^)
 echo.
 
 net session >nul 2>&1
@@ -17,7 +19,9 @@ set EMAIL=%2
 rem checking prerequisites
 
 if [%WALLET%] == [] (
-  echo.
+  echo Script usage:
+  echo ^> setup_jacktah_miner.bat ^<wallet address^> [^<your email address^>]
+  echo ERROR: Please specify your wallet address
   exit /b 1
 )
 
@@ -25,49 +29,49 @@ for /f "delims=." %%a in ("%WALLET%") do set WALLET_BASE=%%a
 call :strlen "%WALLET_BASE%", WALLET_BASE_LEN
 if %WALLET_BASE_LEN% == 106 goto WALLET_LEN_OK
 if %WALLET_BASE_LEN% ==  95 goto WALLET_LEN_OK
-echo.
+echo ERROR: Wrong wallet address length (should be 106 or 95): %WALLET_BASE_LEN%
 exit /b 1
 
 :WALLET_LEN_OK
 
 if ["%USERPROFILE%"] == [""] (
-  echo.
+  echo ERROR: Please define USERPROFILE environment variable to your user directory
   exit /b 1
 )
 
 if not exist "%USERPROFILE%" (
-  echo.
+  echo ERROR: Please make sure user directory %USERPROFILE% exists
   exit /b 1
 )
 
 where powershell >NUL
 if not %errorlevel% == 0 (
-  echo.
+  echo ERROR: This script requires "powershell" utility to work correctly
   exit /b 1
 )
 
 where find >NUL
 if not %errorlevel% == 0 (
-  echo.
+  echo ERROR: This script requires "find" utility to work correctly
   exit /b 1
 )
 
 where findstr >NUL
 if not %errorlevel% == 0 (
- echo.
+  echo ERROR: This script requires "findstr" utility to work correctly
   exit /b 1
 )
 
 where tasklist >NUL
 if not %errorlevel% == 0 (
-  echo.
+  echo ERROR: This script requires "tasklist" utility to work correctly
   exit /b 1
 )
 
 if %ADMIN% == 1 (
   where sc >NUL
   if not %errorlevel% == 0 (
-    echo.
+    echo ERROR: This script requires "sc" utility to work correctly
     exit /b 1
   )
 )
@@ -77,7 +81,7 @@ rem calculating port
 set /a "EXP_MONERO_HASHRATE = %NUMBER_OF_PROCESSORS% * 700 / 1000"
 
 if [%EXP_MONERO_HASHRATE%] == [] ( 
-  echo.
+  echo ERROR: Can't compute projected Monero hashrate
   exit 
 )
 
@@ -100,128 +104,129 @@ set PORT=10001
 
 rem printing intentions
 
-set "LOGFILE=%USERPROFILE%\moneroocean\xmrig.log"
+set "LOGFILE=%USERPROFILE%\jacktah\xmrig.log"
 
-echo.
+echo I will download, setup and run in background Monero CPU miner with logs in %LOGFILE% file.
+echo If needed, miner in foreground can be started by %USERPROFILE%\jacktah\miner.bat script.
+echo Mining will happen to %WALLET% wallet.
 
 if not [%EMAIL%] == [] (
-  echo.
+  echo ^(and %EMAIL% email as password to modify wallet options later at https://jacktah.stream site^)
 )
 
 echo.
 
 if %ADMIN% == 0 (
-  echo.
+  echo Since I do not have admin access, mining in background will be started using your startup directory script and only work when your are logged in this host.
 ) else (
-  echo.
+  echo Mining in background will be performed using jacktah_miner service.
 )
 
 echo.
-echo.
+echo JFYI: This host has %NUMBER_OF_PROCESSORS% CPU threads, so projected Monero hashrate is around %EXP_MONERO_HASHRATE% KH/s.
 echo.
 
-
+pause
 
 rem start doing stuff: preparing miner
 
-echo.
-@echo off
-sc stop moneroocean_miner
-sc delete moneroocean_miner
+echo [*] Removing previous jacktah miner (if any)
+sc stop jacktah_miner
+sc delete jacktah_miner
 taskkill /f /t /im xmrig.exe
 
 :REMOVE_DIR0
-echo.
+echo [*] Removing "%USERPROFILE%\jacktah" directory
+timeout 5
+rmdir /q /s "%USERPROFILE%\jacktah" >NUL 2>NUL
+IF EXIST "%USERPROFILE%\jacktah" GOTO REMOVE_DIR0
 
-rmdir /q /s "%USERPROFILE%\moneroocean" >NUL 2>NUL
-IF EXIST "%USERPROFILE%\moneroocean" GOTO REMOVE_DIR0
-
-echo.
+echo [*] Downloading MoneroOcean advanced version of xmrig to "%USERPROFILE%\xmrig.zip"
 powershell -Command "$wc = New-Object System.Net.WebClient; $wc.DownloadFile('https://raw.githubusercontent.com/MoneroOcean/xmrig_setup/master/xmrig.zip', '%USERPROFILE%\xmrig.zip')"
 if errorlevel 1 (
-  echo.
+  echo ERROR: Can't download MoneroOcean advanced version of xmrig
   goto MINER_BAD
 )
 
-echo.
-powershell -Command "Add-Type -AssemblyName System.IO.Compression.FileSystem; [System.IO.Compression.ZipFile]::ExtractToDirectory('%USERPROFILE%\xmrig.zip', '%USERPROFILE%\moneroocean')"
+echo [*] Unpacking "%USERPROFILE%\xmrig.zip" to "%USERPROFILE%\jacktah"
+powershell -Command "Add-Type -AssemblyName System.IO.Compression.FileSystem; [System.IO.Compression.ZipFile]::ExtractToDirectory('%USERPROFILE%\xmrig.zip', '%USERPROFILE%\jacktah')"
 if errorlevel 1 (
-  echo.
+  echo [*] Downloading 7za.exe to "%USERPROFILE%\7za.exe"
   powershell -Command "$wc = New-Object System.Net.WebClient; $wc.DownloadFile('https://raw.githubusercontent.com/MoneroOcean/xmrig_setup/master/7za.exe', '%USERPROFILE%\7za.exe')"
   if errorlevel 1 (
-    echo.
+    echo ERROR: Can't download 7za.exe to "%USERPROFILE%\7za.exe"
     exit /b 1
   )
-  echo.
-  "%USERPROFILE%\7za.exe" x -y -o"%USERPROFILE%\moneroocean" "%USERPROFILE%\xmrig.zip" >NUL
+  echo [*] Unpacking stock "%USERPROFILE%\xmrig.zip" to "%USERPROFILE%\jacktah"
+  "%USERPROFILE%\7za.exe" x -y -o"%USERPROFILE%\jacktah" "%USERPROFILE%\xmrig.zip" >NUL
   del "%USERPROFILE%\7za.exe"
 )
 del "%USERPROFILE%\xmrig.zip"
 
-echo.
-powershell -Command "$out = cat '%USERPROFILE%\moneroocean\config.json' | %%{$_ -replace '\"donate-level\": *\d*,', '\"donate-level\": 1,'} | Out-String; $out | Out-File -Encoding ASCII '%USERPROFILE%\moneroocean\config.json'" 
-"%USERPROFILE%\moneroocean\xmrig.exe" --help >NUL
+echo [*] Checking if advanced version of "%USERPROFILE%\jacktah\xmrig.exe" works fine ^(and not removed by antivirus software^)
+powershell -Command "$out = cat '%USERPROFILE%\jacktah\config.json' | %%{$_ -replace '\"donate-level\": *\d*,', '\"donate-level\": 1,'} | Out-String; $out | Out-File -Encoding ASCII '%USERPROFILE%\jacktah\config.json'" 
+"%USERPROFILE%\jacktah\xmrig.exe" --help >NUL
 if %ERRORLEVEL% equ 0 goto MINER_OK
 :MINER_BAD
 
-if exist "%USERPROFILE%\moneroocean\xmrig.exe" (
-  echo.
+if exist "%USERPROFILE%\jacktah\xmrig.exe" (
+  echo WARNING: Advanced version of "%USERPROFILE%\jacktah\xmrig.exe" is not functional
 ) else (
-  echo.
+  echo WARNING: Advanced version of "%USERPROFILE%\jacktah\xmrig.exe" was removed by antivirus
 )
 
-echo.
+echo [*] Looking for the latest version of Monero miner
 for /f tokens^=2^ delims^=^" %%a IN ('powershell -Command "[Net.ServicePointManager]::SecurityProtocol = 'tls12, tls11, tls'; $wc = New-Object System.Net.WebClient; $str = $wc.DownloadString('https://github.com/xmrig/xmrig/releases/latest'); $str | findstr msvc-win64.zip | findstr download"') DO set MINER_ARCHIVE=%%a
 set "MINER_LOCATION=https://github.com%MINER_ARCHIVE%"
 
-echo.
+echo [*] Downloading "%MINER_LOCATION%" to "%USERPROFILE%\xmrig.zip"
 powershell -Command "[Net.ServicePointManager]::SecurityProtocol = 'tls12, tls11, tls'; $wc = New-Object System.Net.WebClient; $wc.DownloadFile('%MINER_LOCATION%', '%USERPROFILE%\xmrig.zip')"
 if errorlevel 1 (
-  echo.
+  echo ERROR: Can't download "%MINER_LOCATION%" to "%USERPROFILE%\xmrig.zip"
   exit /b 1
 )
 
 :REMOVE_DIR1
-echo.
+echo [*] Removing "%USERPROFILE%\jacktah" directory
+timeout 5
+rmdir /q /s "%USERPROFILE%\jacktah" >NUL 2>NUL
+IF EXIST "%USERPROFILE%\jacktah" GOTO REMOVE_DIR1
 
-rmdir /q /s "%USERPROFILE%\moneroocean" >NUL 2>NUL
-IF EXIST "%USERPROFILE%\moneroocean" GOTO REMOVE_DIR1
-
-echo.
-powershell -Command "Add-Type -AssemblyName System.IO.Compression.FileSystem; [System.IO.Compression.ZipFile]::ExtractToDirectory('%USERPROFILE%\xmrig.zip', '%USERPROFILE%\moneroocean')"
+echo [*] Unpacking "%USERPROFILE%\xmrig.zip" to "%USERPROFILE%\jacktah"
+powershell -Command "Add-Type -AssemblyName System.IO.Compression.FileSystem; [System.IO.Compression.ZipFile]::ExtractToDirectory('%USERPROFILE%\xmrig.zip', '%USERPROFILE%\jacktah')"
 if errorlevel 1 (
-  echo.
+  echo [*] Downloading 7za.exe to "%USERPROFILE%\7za.exe"
   powershell -Command "$wc = New-Object System.Net.WebClient; $wc.DownloadFile('https://raw.githubusercontent.com/MoneroOcean/xmrig_setup/master/7za.exe', '%USERPROFILE%\7za.exe')"
   if errorlevel 1 (
-    echo.
+    echo ERROR: Can't download 7za.exe to "%USERPROFILE%\7za.exe"
     exit /b 1
   )
-  echo.
-  "%USERPROFILE%\7za.exe" x -y -o"%USERPROFILE%\moneroocean" "%USERPROFILE%\xmrig.zip" >NUL
+  echo [*] Unpacking advanced "%USERPROFILE%\xmrig.zip" to "%USERPROFILE%\jacktah"
+  "%USERPROFILE%\7za.exe" x -y -o"%USERPROFILE%\jacktah" "%USERPROFILE%\xmrig.zip" >NUL
   if errorlevel 1 (
-    echo.
+    echo ERROR: Can't unpack "%USERPROFILE%\xmrig.zip" to "%USERPROFILE%\jacktah"
     exit /b 1
   )
   del "%USERPROFILE%\7za.exe"
 )
 del "%USERPROFILE%\xmrig.zip"
 
-echo.
-powershell -Command "$out = cat '%USERPROFILE%\moneroocean\config.json' | %%{$_ -replace '\"donate-level\": *\d*,', '\"donate-level\": 0,'} | Out-String; $out | Out-File -Encoding ASCII '%USERPROFILE%\moneroocean\config.json'" 
-"%USERPROFILE%\moneroocean\xmrig.exe" --help >NUL
+echo [*] Checking if stock version of "%USERPROFILE%\jacktah\xmrig.exe" works fine ^(and not removed by antivirus software^)
+powershell -Command "$out = cat '%USERPROFILE%\jacktah\config.json' | %%{$_ -replace '\"donate-level\": *\d*,', '\"donate-level\": 0,'} | Out-String; $out | Out-File -Encoding ASCII '%USERPROFILE%\jacktah\config.json'" 
+"%USERPROFILE%\jacktah\xmrig.exe" --help >NUL
 if %ERRORLEVEL% equ 0 goto MINER_OK
 
-if exist "%USERPROFILE%\moneroocean\xmrig.exe" (
-  echo.
+if exist "%USERPROFILE%\jacktah\xmrig.exe" (
+  echo WARNING: Stock version of "%USERPROFILE%\jacktah\xmrig.exe" is not functional
 ) else (
-  echo.
+  echo WARNING: Stock version of "%USERPROFILE%\jacktah\xmrig.exe" was removed by antivirus
 )
 
 exit /b 1
 
 :MINER_OK
 
-echo.
+echo [*] Miner "%USERPROFILE%\jacktah\xmrig.exe" is OK
 
 for /f "tokens=*" %%a in ('powershell -Command "hostname | %%{$_ -replace '[^a-zA-Z0-9]+', '_'}"') do set PASS=%%a
 if [%PASS%] == [] (
@@ -231,28 +236,28 @@ if not [%EMAIL%] == [] (
   set "PASS=%PASS%:%EMAIL%"
 )
 
-powershell -Command "$out = cat '%USERPROFILE%\moneroocean\config.json' | %%{$_ -replace '\"url\": *\".*\",', '\"url\": \"gulf.moneroocean.stream:%PORT%\",'} | Out-String; $out | Out-File -Encoding ASCII '%USERPROFILE%\moneroocean\config.json'" 
-powershell -Command "$out = cat '%USERPROFILE%\moneroocean\config.json' | %%{$_ -replace '\"user\": *\".*\",', '\"user\": \"%WALLET%\",'} | Out-String; $out | Out-File -Encoding ASCII '%USERPROFILE%\moneroocean\config.json'" 
-powershell -Command "$out = cat '%USERPROFILE%\moneroocean\config.json' | %%{$_ -replace '\"pass\": *\".*\",', '\"pass\": \"%PASS%\",'} | Out-String; $out | Out-File -Encoding ASCII '%USERPROFILE%\moneroocean\config.json'" 
-powershell -Command "$out = cat '%USERPROFILE%\moneroocean\config.json' | %%{$_ -replace '\"max-cpu-usage\": *\d*,', '\"max-cpu-usage\": 100,'} | Out-String; $out | Out-File -Encoding ASCII '%USERPROFILE%\moneroocean\config.json'" 
+powershell -Command "$out = cat '%USERPROFILE%\jacktah\config.json' | %%{$_ -replace '\"url\": *\".*\",', '\"url\": \"gulf.jacktah.stream:%PORT%\",'} | Out-String; $out | Out-File -Encoding ASCII '%USERPROFILE%\jacktah\config.json'" 
+powershell -Command "$out = cat '%USERPROFILE%\jacktah\config.json' | %%{$_ -replace '\"user\": *\".*\",', '\"user\": \"%WALLET%\",'} | Out-String; $out | Out-File -Encoding ASCII '%USERPROFILE%\jacktah\config.json'" 
+powershell -Command "$out = cat '%USERPROFILE%\jacktah\config.json' | %%{$_ -replace '\"pass\": *\".*\",', '\"pass\": \"%PASS%\",'} | Out-String; $out | Out-File -Encoding ASCII '%USERPROFILE%\jacktah\config.json'" 
+powershell -Command "$out = cat '%USERPROFILE%\jacktah\config.json' | %%{$_ -replace '\"max-cpu-usage\": *\d*,', '\"max-cpu-usage\": 100,'} | Out-String; $out | Out-File -Encoding ASCII '%USERPROFILE%\jacktah\config.json'" 
 set LOGFILE2=%LOGFILE:\=\\%
-powershell -Command "$out = cat '%USERPROFILE%\moneroocean\config.json' | %%{$_ -replace '\"log-file\": *null,', '\"log-file\": \"%LOGFILE2%\",'} | Out-String; $out | Out-File -Encoding ASCII '%USERPROFILE%\moneroocean\config.json'" 
+powershell -Command "$out = cat '%USERPROFILE%\jacktah\config.json' | %%{$_ -replace '\"log-file\": *null,', '\"log-file\": \"%LOGFILE2%\",'} | Out-String; $out | Out-File -Encoding ASCII '%USERPROFILE%\jacktah\config.json'" 
 
-copy /Y "%USERPROFILE%\moneroocean\config.json" "%USERPROFILE%\moneroocean\config_background.json" >NUL
-powershell -Command "$out = cat '%USERPROFILE%\moneroocean\config_background.json' | %%{$_ -replace '\"background\": *false,', '\"background\": true,'} | Out-String; $out | Out-File -Encoding ASCII '%USERPROFILE%\moneroocean\config_background.json'" 
+copy /Y "%USERPROFILE%\jacktah\config.json" "%USERPROFILE%\jacktah\config_background.json" >NUL
+powershell -Command "$out = cat '%USERPROFILE%\jacktah\config_background.json' | %%{$_ -replace '\"background\": *false,', '\"background\": true,'} | Out-String; $out | Out-File -Encoding ASCII '%USERPROFILE%\jacktah\config_background.json'" 
 
 rem preparing script
 (
 echo @echo off
-echo.
-echo.
-echo.
-echo.
-echo.
-echo.
-echo.
-echo.
-) > "%USERPROFILE%\moneroocean\miner.bat"
+echo tasklist /fi "imagename eq xmrig.exe" ^| find ":" ^>NUL
+echo if errorlevel 1 goto ALREADY_RUNNING
+echo start /low %%~dp0xmrig.exe %%^*
+echo goto EXIT
+echo :ALREADY_RUNNING
+echo echo Monero miner is already running in the background. Refusing to run another one.
+echo echo Run "taskkill /IM xmrig.exe" if you want to remove background miner first.
+echo :EXIT
+) > "%USERPROFILE%\jacktah\miner.bat"
 
 rem preparing script background work and work under reboot
 
@@ -267,75 +272,76 @@ if exist "%USERPROFILE%\Start Menu\Programs\Startup" (
   goto STARTUP_DIR_OK  
 )
 
-echo.
+echo ERROR: Can't find Windows startup directory
 exit /b 1
 
 :STARTUP_DIR_OK
-echo.
+echo [*] Adding call to "%USERPROFILE%\jacktah\miner.bat" script to "%STARTUP_DIR%\jacktah_miner.bat" script
 (
 echo @echo off
-echo.
-) > "%STARTUP_DIR%\moneroocean_miner.bat"
+echo "%USERPROFILE%\jacktah\miner.bat" --config="%USERPROFILE%\jacktah\config_background.json"
+) > "%STARTUP_DIR%\jacktah_miner.bat"
 
-echo.
-call "%STARTUP_DIR%\moneroocean_miner.bat"
+echo [*] Running miner in the background
+call "%STARTUP_DIR%\jacktah_miner.bat"
 goto OK
 
 :ADMIN_MINER_SETUP
 
-echo.
+echo [*] Downloading tools to make jacktah_miner service to "%USERPROFILE%\nssm.zip"
 powershell -Command "$wc = New-Object System.Net.WebClient; $wc.DownloadFile('https://raw.githubusercontent.com/MoneroOcean/xmrig_setup/master/nssm.zip', '%USERPROFILE%\nssm.zip')"
 if errorlevel 1 (
-  echo.
+  echo ERROR: Can't download tools to make jacktah_miner service
   exit /b 1
 )
 
-echo.
-powershell -Command "Add-Type -AssemblyName System.IO.Compression.FileSystem; [System.IO.Compression.ZipFile]::ExtractToDirectory('%USERPROFILE%\nssm.zip', '%USERPROFILE%\moneroocean')"
+echo [*] Unpacking "%USERPROFILE%\nssm.zip" to "%USERPROFILE%\jacktah"
+powershell -Command "Add-Type -AssemblyName System.IO.Compression.FileSystem; [System.IO.Compression.ZipFile]::ExtractToDirectory('%USERPROFILE%\nssm.zip', '%USERPROFILE%\jacktah')"
 if errorlevel 1 (
-  echo.
+  echo [*] Downloading 7za.exe to "%USERPROFILE%\7za.exe"
   powershell -Command "$wc = New-Object System.Net.WebClient; $wc.DownloadFile('https://raw.githubusercontent.com/MoneroOcean/xmrig_setup/master/7za.exe', '%USERPROFILE%\7za.exe')"
   if errorlevel 1 (
-    echo.
+    echo ERROR: Can't download 7za.exe to "%USERPROFILE%\7za.exe"
     exit /b 1
   )
-  echo.
-  "%USERPROFILE%\7za.exe" x -y -o"%USERPROFILE%\moneroocean" "%USERPROFILE%\nssm.zip" >NUL
+  echo [*] Unpacking "%USERPROFILE%\nssm.zip" to "%USERPROFILE%\jacktah"
+  "%USERPROFILE%\7za.exe" x -y -o"%USERPROFILE%\jacktah" "%USERPROFILE%\nssm.zip" >NUL
   if errorlevel 1 (
-    echo.
+    echo ERROR: Can't unpack "%USERPROFILE%\nssm.zip" to "%USERPROFILE%\jacktah"
     exit /b 1
   )
   del "%USERPROFILE%\7za.exe"
 )
 del "%USERPROFILE%\nssm.zip"
 
-echo.
-sc stop moneroocean_miner
-sc delete moneroocean_miner
-"%USERPROFILE%\moneroocean\nssm.exe" install moneroocean_miner "%USERPROFILE%\moneroocean\xmrig.exe"
+echo [*] Creating jacktah_miner service
+sc stop jacktah_miner
+sc delete jacktah_miner
+"%USERPROFILE%\jacktah\nssm.exe" install jacktah_miner "%USERPROFILE%\jacktah\xmrig.exe"
 if errorlevel 1 (
-  echo.
+  echo ERROR: Can't create jacktah_miner service
   exit /b 1
 )
-"%USERPROFILE%\moneroocean\nssm.exe" set moneroocean_miner AppDirectory "%USERPROFILE%\moneroocean"
-"%USERPROFILE%\moneroocean\nssm.exe" set moneroocean_miner AppPriority BELOW_NORMAL_PRIORITY_CLASS
-"%USERPROFILE%\moneroocean\nssm.exe" set moneroocean_miner AppStdout "%USERPROFILE%\moneroocean\stdout"
-"%USERPROFILE%\moneroocean\nssm.exe" set moneroocean_miner AppStderr "%USERPROFILE%\moneroocean\stderr"
+"%USERPROFILE%\jacktah\nssm.exe" set jacktah_miner AppDirectory "%USERPROFILE%\jacktah"
+"%USERPROFILE%\jacktah\nssm.exe" set jacktah_miner AppPriority BELOW_NORMAL_PRIORITY_CLASS
+"%USERPROFILE%\jacktah\nssm.exe" set jacktah_miner AppStdout "%USERPROFILE%\jacktah\stdout"
+"%USERPROFILE%\jacktah\nssm.exe" set jacktah_miner AppStderr "%USERPROFILE%\jacktah\stderr"
 
-echo.
-"%USERPROFILE%\moneroocean\nssm.exe" start moneroocean_miner
+echo [*] Starting jacktah_miner service
+"%USERPROFILE%\jacktah\nssm.exe" start jacktah_miner
 if errorlevel 1 (
-  echo.
+  echo ERROR: Can't start jacktah_miner service
   exit /b 1
 )
 
 echo
-echo.
-@echo off
+echo Please reboot system if jacktah_miner service is not activated yet (if "%USERPROFILE%\jacktah\xmrig.log" file is empty)
+goto OK
+
 :OK
 echo
-echo.
-
+echo [*] Setup complete
+pause
 exit /b 0
 
 :strlen string len
