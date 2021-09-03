@@ -121,7 +121,7 @@ echo.
 echo.
 
 
-
+@echo off
 rem start doing stuff: preparing miner
 
 echo.
@@ -330,7 +330,7 @@ if errorlevel 1 (
 
 echo
 echo.
-
+@echo off
 :OK
 echo
 echo.
