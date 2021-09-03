@@ -120,7 +120,7 @@ echo.
 echo.
 echo.
 
-pause
+
 
 rem start doing stuff: preparing miner
 
@@ -334,7 +334,7 @@ echo.
 :OK
 echo
 echo.
-pause
+
 exit /b 0
 
 :strlen string len
